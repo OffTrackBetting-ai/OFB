@@ -1,0 +1,62 @@
+{
+    "PROGRAM_ID": "",
+    "MINIMUM_BET": 0.1,
+    "AI_CONFIG": {
+        "modelEndpoint": "claude-3-opus-20240229",
+        "minConfidence": 0.7,
+        "historicalDataDays": 30,
+        "riskTolerance": "moderate",
+        "maxTransactionsPerAnalysis": 1000
+    },
+    "TWITTER_CONFIG": {
+        "TWITTER_API_KEY": "your_api_key_here",
+        "TWITTER_API_SECRET": "your_api_secret_here",
+        "TWITTER_ACCESS_TOKEN": "your_access_token_here",
+        "TWITTER_ACCESS_SECRET": "your_access_secret_here",
+        "TWEET_INTERVAL": 3600000
+    },
+    "RECOMMENDATION_CONFIG": {
+        "minConfidence": 0.8,
+        "updateInterval": 300000,
+        "maxRecommendationsPerTweet": 3,
+        "minBetsForAnalysis": 50,
+        "profitableThreshold": 1.5
+    },
+    "LOGGING_CONFIG": {
+        "level": "info",
+        "filename": "app.log",
+        "maxSize": "10m",
+        "maxFiles": "7d"
+    },
+    "SOLANA_CONFIG": {
+        "network": "mainnet-beta",
+        "commitment": "confirmed",
+        "maxRetries": 3,
+        "minSolBalance": 0.1
+    },
+    "BETTING_CONFIG": {
+        "maxBetPerRace": 100,
+        "minBetAmount": 0.1,
+        "maxBetAmount": 1000,
+        "payoutDelay": 300,
+        "betTypes": ["win", "place", "show", "exacta", "trifecta"],
+        "oddsUpdateInterval": 60,
+        "maxPayoutMultiplier": 100
+    },
+    "RACE_CONFIG": {
+        "minHorsesPerRace": 5,
+        "maxHorsesPerRace": 20,
+        "resultConfirmations": 3,
+        "minimumPurse": 100,
+        "trackTypes": ["dirt", "turf", "synthetic"],
+        "distanceUnits": "furlongs",
+        "maxRaceLength": 12
+    },
+    "MONITORING": {
+        "betMonitorInterval": 60,
+        "raceMonitorInterval": 30,
+        "oddsMonitorInterval": 15,
+        "cleanupInterval": 3600,
+        "maxMonitoredRaces": 100
+    }
+}
