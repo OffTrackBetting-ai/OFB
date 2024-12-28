@@ -1,5 +1,7 @@
 # Off Track Betting Advisor
 
+[![Twitter Follow](https://img.shields.io/twitter/follow/OFBSOL?style=social)](https://twitter.com/OFBSOL)
+
 Off Track Betting Advisor is an AI-powered horse racing analysis platform that leverages Claude 3 Opus to analyze racing patterns and provide intelligent betting recommendations. The platform focuses on analyzing race conditions, historical performance, and current factors to suggest optimal betting strategies.
 
 ## Features
@@ -14,6 +16,37 @@ Off Track Betting Advisor is an AI-powered horse racing analysis platform that l
 - Comprehensive race monitoring
 - Betting pattern recognition
 - Success probability calculations
+- Automated Twitter updates with betting recommendations
+
+## Prerequisites
+
+- Node.js >= 16.0.0
+- Anthropic API key for Claude 3 Opus
+- Twitter API credentials
+- npm or yarn
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/off-track-betting-advisor.git
+cd off-track-betting-advisor
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Configure environment variables:
+Create a `.env` file with:
+```env
+ANTHROPIC_API_KEY=your_api_key_here
+TWITTER_API_KEY=your_twitter_api_key
+TWITTER_API_SECRET=your_twitter_api_secret
+TWITTER_ACCESS_TOKEN=your_twitter_access_token
+TWITTER_ACCESS_SECRET=your_twitter_access_secret
+```
 
 ## Configuration
 
@@ -23,29 +56,21 @@ The application can be configured through the `config.json` file:
 {
     "AI_CONFIG": {
         "modelEndpoint": "claude-3-opus-20240229",
-        "minConfidence": 0.75,
+        "minConfidence": 0.7,
         "historicalDataDays": 30,
-        "analysisUpdateInterval": 300
+        "riskTolerance": "moderate"
+    },
+    "TWITTER_CONFIG": {
+        "TWEET_INTERVAL": 3600000
     },
     "RECOMMENDATION_CONFIG": {
-        "maxRecommendationsPerRace": 3,
-        "minConfidenceThreshold": 0.7,
-        "riskLevels": ["conservative", "moderate", "aggressive"],
-        "recommendationTypes": ["win", "place", "show", "exacta", "trifecta"],
-        "updateInterval": 60
+        "minConfidence": 0.8,
+        "updateInterval": 300000,
+        "maxRecommendationsPerTweet": 3
     },
     "RACE_CONFIG": {
-        "minHorsesPerRace": 5,
-        "maxHorsesPerRace": 20,
         "trackTypes": ["dirt", "turf", "synthetic"],
-        "distanceUnits": "furlongs",
-        "maxRaceLength": 12
-    },
-    "MONITORING": {
-        "raceMonitorInterval": 30,
-        "oddsMonitorInterval": 15,
-        "analysisRefreshInterval": 300,
-        "maxMonitoredRaces": 100
+        "distanceUnits": "furlongs"
     }
 }
 ```
@@ -63,56 +88,65 @@ npm run dev
 ```
 
 2. The application will:
-   - Load historical race data
-   - Start AI analysis system using Claude 3
-   - Begin monitoring races and odds
-   - Generate betting recommendations
+   - Initialize the AI analysis system
+   - Start monitoring races and odds
+   - Begin generating betting recommendations
+   - Automatically tweet recommendations based on configured intervals
 
-## Architecture
+## Twitter Integration
 
-The platform consists of several key components:
+The platform automatically tweets betting recommendations with:
+- Track information and conditions
+- Bet type recommendations
+- Risk level assessment
+- Confidence scores
+- Key insights and patterns
+- Usage guidelines
+- Responsible betting disclaimers
 
-1. **Race Model (`src/betting/models/race.js`)**
-   - Race data structure and management
-   - Horse and odds tracking
-   - Results handling
-   - Track condition monitoring
+Example tweet format:
+```
+🏇 Horse Racing Tip 💪
 
-2. **Betting Analyzer (`src/betting/analyzer.js`)**
-   - Integrates with Claude 3 Opus for analysis
-   - Processes racing patterns and historical data
-   - Generates betting recommendations
-   - Calculates success probabilities
-   - Risk assessment
+Track: Churchill Downs
+Bet Type: Exacta
+Risk Level: Moderate
+Confidence: 85%
 
-3. **Recommendation Manager (`src/betting/recommendations.js`)**
-   - Strategy generation
-   - Odds analysis
-   - Risk level assessment
-   - Success probability calculations
-   - Historical performance tracking
+💡 Key Insight: Strong performance pattern in similar track conditions
+
+📊 Recommended stake: 2% of bankroll
+Min odds: 3.5x
+
+⚠️ This is AI-generated analysis. Always bet responsibly.
+
+#HorseRacing #BettingTips #AI
+```
 
 ## Recommendation System
 
-The platform provides detailed betting recommendations:
+The platform provides detailed betting recommendations through its API:
 
 ```javascript
-// Initialize recommendation manager
-const recommendationManager = new RecommendationManager(config);
+// Initialize recommendation service
+const recommendationService = new RecommendationService(config);
 
-// Get recommendations for a race
-const recommendations = await recommendationManager.getRecommendations({
-    raceId: race.id,
+// Get general recommendations
+const recommendations = await recommendationService.getRecommendations({
+    track: 'Churchill Downs',
+    betType: 'exacta',
     riskLevel: 'moderate',
-    confidenceThreshold: 0.75
+    minConfidence: 0.75
 });
 
-// Get detailed analysis for a specific horse
-const analysis = await recommendationManager.analyzeHorse({
-    raceId: race.id,
-    horseId: horse.id,
-    includeHistoricalPerformance: true
-});
+// Get recommendations for a specific race
+const raceRecommendations = await recommendationService.getRecommendationForRace(
+    raceId,
+    {
+        minConfidence: 0.8,
+        riskLevel: 'conservative'
+    }
+);
 ```
 
 ## AI Analysis
@@ -120,18 +154,14 @@ const analysis = await recommendationManager.analyzeHorse({
 The platform uses Claude 3 Opus for advanced race analysis:
 
 ```javascript
-const analyzer = new BettingAnalyzer({
-    apiKey: process.env.ANTHROPIC_API_KEY
-});
+const analyzer = new BettingAnalyzer(config);
 
-// Get comprehensive race analysis
-const analysis = await analyzer.analyzeRace(
-    race,
+// Analyze betting patterns
+const analysis = await analyzer.analyzePattern(
+    bettingHistory,
     {
-        trackConditions: 'fast',
-        weatherImpact: 'clear',
-        raceClass: 'stakes',
-        includeHistoricalData: true
+        includeHistoricalData: true,
+        riskTolerance: 'moderate'
     }
 );
 ```
@@ -145,31 +175,6 @@ The AI system provides:
 - Risk level assessment
 - Success probability calculations
 - Historical pattern recognition
-
-## Race Management
-
-The platform includes comprehensive race tracking and analysis:
-
-```javascript
-const race = new Race({
-    track: 'Churchill Downs',
-    distance: '6f',
-    surface: 'dirt',
-    purse: 50000,
-    horses: [...],
-    weather: 'clear',
-    trackCondition: 'fast'
-});
-
-// Track odds changes
-race.trackOddsMovement(horseId, newOdds);
-
-// Analyze results
-const resultAnalysis = await race.analyzeResults([
-    { position: 1, horseId: 'horse1', time: '1:10.5' },
-    { position: 2, horseId: 'horse2', time: '1:10.8' }
-]);
-```
 
 ## Contributing
 
