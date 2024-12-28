@@ -1,21 +1,15 @@
 const BetterAnalyzer = require('../analysis/better-analyzer');
 const StrategyAggregator = require('../analysis/strategy-aggregator');
-const { Connection, PublicKey } = require('@solana/web3.js');
 
 class RecommendationService {
     constructor(config) {
         this.config = config;
-        this.connection = new Connection(
-            config.network === 'devnet' ? 
-                'https://api.devnet.solana.com' : 
-                'https://api.mainnet-beta.solana.com',
-            'confirmed'
-        );
         this.betterAnalyzer = new BetterAnalyzer(config);
         this.strategyAggregator = new StrategyAggregator(config);
         this.recommendations = new Map();
         this.lastUpdate = new Map();
         this.updateInterval = config.recommendationUpdateInterval || 300000; // 5 minutes
+        this.raceDetails = new Map(); // Cache for race details
     }
 
     async initialize() {
@@ -40,24 +34,13 @@ class RecommendationService {
 
     async findProfitableBetters() {
         try {
-            // Find accounts that have interacted with our betting program
-            const accounts = await this.connection.getProgramAccounts(
-                new PublicKey(this.config.BETTING_PROGRAM_ID),
-                {
-                    dataSize: 165, // Expected size of a betting account
-                    filters: [
-                        {
-                            // Filter for accounts with high win rates
-                            memcmp: {
-                                offset: 32, // Offset for win rate in account data
-                                bytes: Buffer.from([0x3F, 0x80]) // > 0.5 in float
-                            }
-                        }
-                    ]
-                }
-            );
-
-            return accounts.map(account => account.pubkey.toString());
+            // This would typically connect to your betting database
+            // For now, return mock data
+            return [
+                'better1',
+                'better2',
+                'better3'
+            ];
         } catch (error) {
             console.error('Error finding profitable betters:', error);
             return [];
@@ -159,20 +142,24 @@ class RecommendationService {
 
     async getRaceDetails(raceId) {
         try {
-            const raceAccount = await this.connection.getAccountInfo(
-                new PublicKey(raceId)
-            );
+            // Check cache first
+            if (this.raceDetails.has(raceId)) {
+                return this.raceDetails.get(raceId);
+            }
 
-            if (!raceAccount) return null;
-
-            // Parse race account data
-            // This would depend on your actual data structure
-            return {
-                track: raceAccount.data.slice(0, 32).toString().trim(),
-                surface: raceAccount.data.slice(32, 64).toString().trim(),
-                weather: raceAccount.data.slice(64, 96).toString().trim(),
-                condition: raceAccount.data.slice(96, 128).toString().trim()
+            // This would typically fetch from your racing database
+            // For now, return mock data
+            const raceDetails = {
+                track: 'Churchill Downs',
+                surface: 'dirt',
+                weather: 'clear',
+                condition: 'fast'
             };
+
+            // Cache the results
+            this.raceDetails.set(raceId, raceDetails);
+
+            return raceDetails;
         } catch (error) {
             console.error('Error fetching race details:', error);
             return null;

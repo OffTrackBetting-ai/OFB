@@ -1,21 +1,15 @@
 const Anthropic = require('@anthropic-ai/sdk');
-const { Connection, PublicKey } = require('@solana/web3.js');
 
 class BetterAnalyzer {
     constructor(config) {
         this.config = config;
-        this.connection = new Connection(
-            config.network === 'devnet' ? 
-                'https://api.devnet.solana.com' : 
-                'https://api.mainnet-beta.solana.com',
-            'confirmed'
-        );
         this.anthropic = new Anthropic({
             apiKey: config.apiKey || process.env.ANTHROPIC_API_KEY
         });
         this.betterProfiles = new Map();
         this.profitableThreshold = config.profitableThreshold || 1.5; // 150% ROI
         this.minBetsForAnalysis = config.minBetsForAnalysis || 50;
+        this.bettingHistory = new Map(); // Cache for betting history
     }
 
     async analyzeBetter(address) {
@@ -42,73 +36,46 @@ class BetterAnalyzer {
 
     async getBettingHistory(address) {
         try {
-            const publicKey = new PublicKey(address);
-            const signatures = await this.connection.getSignaturesForAddress(
-                publicKey,
-                { limit: 1000 }
-            );
+            // Check cache first
+            if (this.bettingHistory.has(address)) {
+                return this.bettingHistory.get(address);
+            }
 
-            const transactions = await Promise.all(
-                signatures.map(sig => 
-                    this.connection.getParsedTransaction(sig.signature)
-                )
-            );
-
-            return this.processBettingTransactions(transactions);
+            // This would typically fetch from your betting database
+            // For now, return mock data
+            const mockHistory = this.generateMockBettingHistory();
+            
+            // Cache the results
+            this.bettingHistory.set(address, mockHistory);
+            
+            return mockHistory;
         } catch (error) {
             console.error('Error fetching betting history:', error);
             return [];
         }
     }
 
-    processBettingTransactions(transactions) {
-        const bettingHistory = [];
-        
-        for (const tx of transactions) {
-            if (!this.isBettingTransaction(tx)) continue;
+    generateMockBettingHistory() {
+        const history = [];
+        const tracks = ['Churchill Downs', 'Belmont Park', 'Santa Anita'];
+        const betTypes = ['win', 'place', 'show', 'exacta', 'trifecta'];
+        const results = ['won', 'lost'];
 
-            const betDetails = this.extractBetDetails(tx);
-            if (betDetails) {
-                bettingHistory.push(betDetails);
-            }
+        // Generate 100 mock bets
+        for (let i = 0; i < 100; i++) {
+            history.push({
+                raceId: `race_${Math.floor(Math.random() * 1000)}`,
+                horseId: `horse_${Math.floor(Math.random() * 100)}`,
+                amount: Math.random() * 100,
+                odds: 1 + Math.random() * 10,
+                betType: betTypes[Math.floor(Math.random() * betTypes.length)],
+                track: tracks[Math.floor(Math.random() * tracks.length)],
+                timestamp: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000, // Random time in last 30 days
+                result: results[Math.floor(Math.random() * results.length)]
+            });
         }
 
-        return bettingHistory;
-    }
-
-    isBettingTransaction(transaction) {
-        if (!transaction?.meta || !transaction.transaction) return false;
-
-        // Check if transaction involves our betting program
-        return transaction.transaction.message.instructions.some(ix => 
-            ix.programId.equals(new PublicKey(this.config.BETTING_PROGRAM_ID))
-        );
-    }
-
-    extractBetDetails(transaction) {
-        try {
-            const instruction = transaction.transaction.message.instructions.find(ix =>
-                ix.programId.equals(new PublicKey(this.config.BETTING_PROGRAM_ID))
-            );
-
-            if (!instruction) return null;
-
-            // Parse instruction data based on your program's instruction format
-            const data = instruction.data;
-            return {
-                raceId: data.slice(1, 33).toString(),
-                horseId: data.slice(33, 65).toString(),
-                amount: new Float64Array(data.slice(65, 73))[0],
-                odds: new Float64Array(data.slice(73, 81))[0],
-                betType: data.slice(81, 91).toString().trim(),
-                timestamp: transaction.blockTime,
-                result: transaction.meta.err === null ? 'won' : 'lost',
-                signature: transaction.signature
-            };
-        } catch (error) {
-            console.error('Error extracting bet details:', error);
-            return null;
-        }
+        return history.sort((a, b) => b.timestamp - a.timestamp);
     }
 
     calculateProfitability(bettingHistory) {
