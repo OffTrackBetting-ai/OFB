@@ -1,4 +1,4 @@
-# Off Track Betting Advisor
+# Off Track Betting
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/OFBSOL?style=social)](https://twitter.com/OFBSOL)
 
