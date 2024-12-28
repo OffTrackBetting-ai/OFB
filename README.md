@@ -2,11 +2,11 @@
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/OFBSOL?style=social)](https://twitter.com/OFBSOL)
 
-Off Track Betting Advisor is an AI-powered horse racing analysis platform that leverages Claude 3 Opus to analyze racing patterns and provide intelligent betting recommendations. The platform focuses on analyzing race conditions, historical performance, and current factors to suggest optimal betting strategies.
+Off Track Betting Advisor is an AI-powered horse racing analysis platform that leverages Anthropic to analyze racing patterns and provide intelligent betting recommendations. The platform focuses on analyzing race conditions, historical performance, and current factors to suggest optimal betting strategies.
 
 ## Features
 
-- AI-powered horse race analysis using Claude 3 Opus
+- AI-powered horse race analysis using Anthropic
 - Real-time odds monitoring and analysis
 - Multiple bet type recommendations (win, place, show, exacta, trifecta)
 - Track condition impact analysis
@@ -21,7 +21,7 @@ Off Track Betting Advisor is an AI-powered horse racing analysis platform that l
 ## Prerequisites
 
 - Node.js >= 16.0.0
-- Anthropic API key for Claude 3 Opus
+- Anthropic API key for Anthropic
 - Twitter API credentials
 - npm or yarn
 
@@ -151,7 +151,7 @@ const raceRecommendations = await recommendationService.getRecommendationForRace
 
 ## AI Analysis
 
-The platform uses Claude 3 Opus for advanced race analysis:
+The platform uses Anthropic for advanced race analysis:
 
 ```javascript
 const analyzer = new BettingAnalyzer(config);
